@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  yapi:
+    image: node:18.16.0
+    container_name: yapi
+    restart: always
+    ports:
+      - 1199:1199
+    depends_on:
+      - mongo
+    working_dir: /web/yapi
+    volumes:
+      - ${PWD}/yapi_root:/web
+    environment:
+      - TZ=Asia/Shanghai
+    command:
+      - sh
+      - -c
+      - |
+        if [ ! -d "/app/node_modules" ]; then
+          echo "no node_modules" && npm install --registry=https://registry.npmmirror.com 
+        fi
+        node server/app.js
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+      - MONGO_INITDB_ROOT_USERNAME=<mongo_username>
+      - MONGO_INITDB_ROOT_PASSWORD=<mongo_password>
+    volumes:
+      - ${PWD}/data/db:/data/db
+      - ${PWD}/data/backup:/data/backup
+    ports:
+      - 27017:27017
+
